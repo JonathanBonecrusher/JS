@@ -1,0 +1,74 @@
+import createElement from '../../assets/lib/create-element.js';
+
+export default class Carousel {
+  #carouselArrowRight = null;
+  #carouselArrowLeft = null;
+  #carouselInner = null;
+  maxSlides = 0; 
+  #currentSlide = 0;
+    constructor(slides) {
+      this.slides = slides;
+      this.maxSlides = slides.length - 1;
+      this.render();
+      this.#carouselArrowRight = this.elem.querySelector(".carousel__arrow_right");
+      this.#carouselArrowLeft = this.elem.querySelector(".carousel__arrow_left");
+      this.#carouselInner = this.elem.querySelector(".carousel__inner");
+      this.#carouselArrowRight.addEventListener('click', this.#arrowLeftClick)
+      this.#carouselArrowLeft.addEventListener('click', this.#arrowRightClick)
+      this.#carouselArrowLeft.style.display = 'none';
+      this.#carouselInner.addEventListener('click', this.#carouselInnerClick)
+    }
+      
+  render() {
+      this.elem = createElement(` 
+      <div class="carousel">
+      <!--Кнопки переключения-->
+        <div class="carousel__arrow carousel__arrow_right">
+          <img src="../../assets/images/icons/angle-icon.svg" alt="icon">
+        </div>
+        <div class="carousel__arrow carousel__arrow_left">
+          <img src="../../assets/images/icons/angle-left-icon.svg" alt="icon">
+        </div>
+        <div class="carousel__inner">
+          ${this.slides.map(elem => `
+            <div class="carousel__slide" data-id="${elem.id}">
+              <img src="../../assets/images/carousel/${elem.image}" class="carousel__img" alt="slide">
+              <div class="carousel__caption">
+                <span class="carousel__price">€${elem.price.toFixed(2)}</span>
+              <div class="carousel__title">${elem.name}</div>
+              <button type="button" class="carousel__button">
+                <img src="../../assets/images/icons/plus-icon.svg" alt="icon">
+              </button>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>`)
+  };
+    
+    #arrowLeftClick = () => {
+      this.#currentSlide++;
+      this.#carouselArrowLeft.style.display = '';
+      if (this.#currentSlide === this.maxSlides) {
+        this.#carouselArrowRight.style.display = 'none';
+      }
+      this.#carouselInner.style.transform = `translateX(-${this.#carouselInner.offsetWidth * this.#currentSlide}px)`;
+      };
+      
+    #arrowRightClick = () => {
+      this.#currentSlide--;
+      this.#carouselArrowRight.style.display = '';
+      if (this.#currentSlide === 0) {
+        this.#carouselArrowLeft.style.display = 'none';
+      }
+      this.#carouselInner.style.transform = `translateX(-${this.#carouselInner.offsetWidth * this.#currentSlide}px)`;
+    };
+    
+    #carouselInnerClick = (event) => {
+      if (event.target.closest('.carousel__button ')) {
+        this.elem.dispatchEvent(new CustomEvent("product-add", { 
+          detail: this.slides[this.#currentSlide].id, 
+          bubbles: true 
+        }))
+      }
+    }
+  }
